@@ -1,0 +1,41 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: kaniko
+spec:
+  inputs:
+    resources:
+    - name: source-repo
+      type: git
+    params:
+    - name: dockerfile
+      description: Path to Dockerfile
+      default: /workspace/source-repo/Dockerfile
+    - name: context
+      description: Path to build context
+      default: /workspace/source-repo
+    - name: credentialsSecretName
+      description: Secret resource name for gcr.io
+    - name: credentialsSecretKey
+      description: Secret resource key for gcr.io
+  outputs:
+    resources:
+    - name: destImage
+      type: image
+  steps:
+  - name: build-and-push
+    image: gcr.io/kaniko-project/executor
+    args:
+    - --dockerfile=${inputs.params.dockerfile}
+    - --context=${inputs.params.context}
+    - --destination=${outputs.resources.destImage.url}
+    volumeMounts:
+    - name: kaniko-secret
+      mountPath: /secret
+    env:
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /secret/${inputs.params.credentialsSecretKey}
+  volumes:
+  - name: kaniko-secret
+    secret:
+      secretName: ${inputs.params.credentialsSecretName}

@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: test-app
+spec:
+  params:
+  - name: credentialsSecretName
+    description: Secret resource name for gcr.io
+  - name: credentialsSecretKey
+    description: Secret resource key for gcr.io
+  resources:
+  - name: test-repo
+    type: git
+  - name: image
+    type: image
+  tasks:
+  - name: build-and-push
+    taskRef:
+      name: kaniko
+    params:
+    - name: dockerfile
+      value: /workspace/source-repo/test-app/Dockerfile
+    - name: context
+      value: /workspace/source-repo/test-app
+    - name: credentialsSecretName
+      value: "${params.credentialsSecretName}"
+    - name: credentialsSecretKey
+      value: "${params.credentialsSecretKey}"
+    resources:
+      inputs:
+      - name: source-repo
+        resource: test-repo
+      outputs:
+      - name: destImage
+        resource: image
+  - name: deploy
+    taskRef:
+      name: deploy
+    resources:
+      inputs:
+      - name: workspace
+        resource: test-repo
+      - name: image
+        resource: image
+        from: [build-and-push]
+    params:
+    - name: path
+      value: /workspace/test-app/manifest.yaml
+    - name: yqArg
+      value: "-d1"
+    - name: yamlPathToImage
+      value: "spec.template.spec.containers[0].image"
