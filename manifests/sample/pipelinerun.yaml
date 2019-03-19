@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: test-app
+spec:
+  serviceAccount: deploy-test-app
+  pipelineRef:
+    name: test-app
+  trigger:
+    type: manual
+  params:
+  - name: credentialsSecretName
+    value: gcr-credentials
+  - name: credentialsSecretKey
+    value: tekton-test-key.json
+  resources:
+  - name: test-repo
+    resourceRef:
+      name: test-git-repo
+  - name: image
+    resourceRef:
+      name: test-app-image
