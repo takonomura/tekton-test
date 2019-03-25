@@ -50,3 +50,13 @@ spec:
       value: "-d1"
     - name: yamlPathToImage
       value: "spec.template.spec.containers[0].image"
+  - name: gofmt
+    taskRef:
+      name: gofmt
+    params:
+    - name: path
+      value: /workspace/source-repo/test-app
+    resources:
+      inputs:
+      - name: source-repo
+        resource: test-repo

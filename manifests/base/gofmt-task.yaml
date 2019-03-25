@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: gofmt
+spec:
+  inputs:
+    resources:
+    - name: source-repo
+      type: git
+    params:
+    - name: path
+      description: Path to .go files
+      default: /workspace/source-repo
+  steps:
+  - name: gofmt
+    image: golang:1.12.1-alpine
+    command: ["sh"]
+    args: ["-c", 'test -z "$(gofmt -l ${inputs.params.path})"']
