@@ -18,13 +18,15 @@ spec:
   steps:
   - name: build-jsonnet
     image: mexisme/jsonnet
-    command: ["jsonnet"]
+    command: ["/jsonnet"]
     args:
       - "-V"
       - "image=${inputs.resources.image.url}"
       - "-o"
       - "${inputs.params.outputPath}"
       - "${inputs.params.path}"
+    securityContext:
+      runAsUser: 0 # root
   outputs:
     resources:
     - name: workspace
