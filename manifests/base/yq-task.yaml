@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: yq
+spec:
+  inputs:
+    resources:
+    - name: workspace
+      type: git
+      targetPath: .
+    - name: image
+      type: image
+    params:
+    - name: path
+      description: Path to the manifest to apply
+    - name: yqArg
+      description:
+        Okay this is a hack, but I didn't feel right hard-coding `-d1` down
+        below
+    - name: yamlPathToImage
+      description:
+        The path to the image to replace in the yaml manifest (arg to yq)
+  steps:
+  - name: replace-image
+    image: mikefarah/yq
+    command: ["yq"]
+    args:
+      - "w"
+      - "-i"
+      - "${inputs.params.yqArg}"
+      - "${inputs.params.path}"
+      - "${inputs.params.yamlPathToImage}"
+      - "${inputs.resources.image.url}"
+  outputs:
+    resources:
+    - name: workspace
+      type: git

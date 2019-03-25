@@ -14,6 +14,16 @@ spec:
   - name: image
     type: image
   tasks:
+  - name: gofmt
+    taskRef:
+      name: gofmt
+    params:
+    - name: path
+      value: /workspace/source-repo/test-app
+    resources:
+      inputs:
+      - name: source-repo
+        resource: test-repo
   - name: build-and-push
     taskRef:
       name: kaniko
@@ -33,9 +43,9 @@ spec:
       outputs:
       - name: destImage
         resource: image
-  - name: deploy
+  - name: yq
     taskRef:
-      name: deploy
+      name: yq
     resources:
       inputs:
       - name: workspace
@@ -43,6 +53,9 @@ spec:
       - name: image
         resource: image
         from: [build-and-push]
+      outputs:
+      - name: workspace
+        resource: test-repo
     params:
     - name: path
       value: /workspace/test-app/manifest.yaml
@@ -50,13 +63,14 @@ spec:
       value: "-d1"
     - name: yamlPathToImage
       value: "spec.template.spec.containers[0].image"
-  - name: gofmt
+  - name: deploy
     taskRef:
-      name: gofmt
-    params:
-    - name: path
-      value: /workspace/source-repo/test-app
+      name: deploy
     resources:
       inputs:
-      - name: source-repo
+      - name: workspace
         resource: test-repo
+        from: [yq]
+    params:
+    - name: path
+      value: /workspace/test-app/manifest.yaml
