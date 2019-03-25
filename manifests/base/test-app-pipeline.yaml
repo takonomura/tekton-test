@@ -24,7 +24,7 @@ spec:
       inputs:
       - name: source-repo
         resource: test-repo
-  - name: build-and-push
+  - name: kaniko
     taskRef:
       name: kaniko
     params:
@@ -52,7 +52,7 @@ spec:
         resource: test-repo
       - name: image
         resource: image
-        from: [build-and-push]
+        from: [kaniko]
       outputs:
       - name: workspace
         resource: test-repo
