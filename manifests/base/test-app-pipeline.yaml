@@ -43,9 +43,9 @@ spec:
       outputs:
       - name: destImage
         resource: image
-  - name: yq
+  - name: jsonnet
     taskRef:
-      name: yq
+      name: jsonnet
     resources:
       inputs:
       - name: workspace
@@ -58,11 +58,9 @@ spec:
         resource: test-repo
     params:
     - name: path
-      value: /workspace/test-app/manifest.yaml
-    - name: yqArg
-      value: "-d1"
-    - name: yamlPathToImage
-      value: "spec.template.spec.containers[0].image"
+      value: /workspace/test-app/manifest.jsonnet
+    - name: outputPath
+      value: /workspace/test-app/manifest.json
   - name: deploy
     taskRef:
       name: deploy
@@ -70,7 +68,7 @@ spec:
       inputs:
       - name: workspace
         resource: test-repo
-        from: [yq]
+        from: [jsonnet]
     params:
     - name: path
-      value: /workspace/test-app/manifest.yaml
+      value: /workspace/test-app/manifest.json

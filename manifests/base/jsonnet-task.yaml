@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: jsonnet
+spec:
+  inputs:
+    resources:
+    - name: workspace
+      type: git
+      targetPath: .
+    - name: image
+      type: image
+    params:
+    - name: path
+      description: Path to jsonnet file
+    - name: outputPath
+      description: Path to output json file
+  steps:
+  - name: build-jsonnet
+    image: mexisme/jsonnet
+    command: ["jsonnet"]
+    args:
+      - "-V"
+      - "image=${inputs.resources.image.url}"
+      - "-o"
+      - "${inputs.params.outputPath}"
+      - "${inputs.params.path}"
+  outputs:
+    resources:
+    - name: workspace
+      type: git
